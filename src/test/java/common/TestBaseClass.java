@@ -129,7 +129,7 @@ public class TestBaseClass {
         capabilities.setCapability("name", "Sample test");
         capabilities.setCapability("platform", System.getenv("HYPEREXECUTE_PLATFORM"));
         capabilities.setCapability("browserName", "chrome");
-        capabilities.setCapability("version", "latest");
+        capabilities.setCapability("version", "127");
 
         capabilities.setCapability("tunnel",false);
         capabilities.setCapability("network",true);
