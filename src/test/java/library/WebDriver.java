@@ -11,90 +11,91 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class WebDriver extends TestBaseClass {
 
+    private WebDriverWait getWait(int seconds) {
+        return new WebDriverWait(driver, Duration.ofSeconds(seconds));
+    }
+
     public void enterText(By locator, String text) {
+        getWait(30).until(ExpectedConditions.visibilityOfElementLocated(locator));
         WebElement element = driver.findElement(locator);
+        element.clear();
         element.sendKeys(text);
     }
 
     public void clearText(By locator) {
-        WebElement element = driver.findElement(locator);
-        element.clear();
+        getWait(30).until(ExpectedConditions.visibilityOfElementLocated(locator));
+        driver.findElement(locator).clear();
     }
 
     public void clickOnButton(By locator) {
-        WebElement element = driver.findElement(locator);
-        element.click();
+        getWait(30).until(ExpectedConditions.elementToBeClickable(locator));
+        driver.findElement(locator).click();
     }
 
     public String getText(By locator) {
-        WebElement element = driver.findElement(locator);
-        return element.getText();
+        getWait(30).until(ExpectedConditions.visibilityOfElementLocated(locator));
+        return driver.findElement(locator).getText();
     }
 
     public String getPlaceholder(By locator) {
-        WebElement element = driver.findElement(locator);
-        return element.getAttribute("placeholder");
+        getWait(30).until(ExpectedConditions.visibilityOfElementLocated(locator));
+        return driver.findElement(locator).getAttribute("placeholder");
     }
 
-    public void selectValueOnDropDown(By locator, String Text) {
+    public void selectValueOnDropDown(By locator, String text) {
+        getWait(30).until(ExpectedConditions.visibilityOfElementLocated(locator));
         Select selectValue = new Select(driver.findElement(locator));
-        selectValue.selectByVisibleText(Text);
+        selectValue.selectByVisibleText(text);
     }
 
-    public void selectValueOnCheckBox(By chkBoxCollection, By labelText, By getInput, String Text) {
+    public void selectValueOnCheckBox(By chkBoxCollection, By labelText, By getInput, String text) {
+
+        getWait(30).until(ExpectedConditions.visibilityOfElementLocated(chkBoxCollection));
 
         List<WebElement> chkBoxCollections = driver.findElements(chkBoxCollection);
         for (WebElement webElement : chkBoxCollections) {
             WebElement getLabel = webElement.findElement(labelText);
             WebElement getInput1 = webElement.findElement(getInput);
-            if (getLabel.getText().equals(Text)) {
+
+            if (getLabel.getText().equals(text)) {
                 if (!getInput1.isSelected()) {
                     getLabel.click();
-                    break;
                 }
+                break;
             }
         }
-
     }
 
-    public void waitForElementVisible(By locator) {
-        WebDriverWait wait = new WebDriverWait(driver, 30);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-    }
+    public void randomClickFromList(By locator) {
 
-    public void waitForElementClickable(By locator) {
-        WebDriverWait wait = new WebDriverWait(driver, 30);
-        wait.until(ExpectedConditions.elementToBeClickable(locator));
-    }
+        getWait(30).until(ExpectedConditions.visibilityOfElementLocated(locator));
 
-    public void randomClickFromList(By Value) {
-
-        List<WebElement> itemsInList = driver.findElements(Value);
+        List<WebElement> itemsInList = driver.findElements(locator);
         int size = itemsInList.size();
-        System.out.println(size);
         int randomNumber = ThreadLocalRandom.current().nextInt(0, size);
         itemsInList.get(randomNumber).click();
     }
 
     public static String randomString() {
-        String SaltChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String saltChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         StringBuilder salt = new StringBuilder();
         Random rnd = new Random();
+
         while (salt.length() < 250) {
-            int index = (int) (rnd.nextFloat() * SaltChars.length());
-            salt.append(SaltChars.charAt(index));
+            int index = (int) (rnd.nextFloat() * saltChars.length());
+            salt.append(saltChars.charAt(index));
         }
         return salt.toString();
     }
 
     public void openURL(String url) {
-
         driver.get(url);
     }
 }
