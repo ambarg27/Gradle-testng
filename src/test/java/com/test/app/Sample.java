@@ -3,6 +3,9 @@ package com.test.app;
 import com.aventstack.extentreports.Status;
 import common.TestBaseClass;
 import org.testng.annotations.Test;
+import java.time.Duration;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class Sample extends TestBaseClass {
 
@@ -51,3 +54,4 @@ public class Sample extends TestBaseClass {
         logger.info("Verify Search Box");
     }
 }
+
