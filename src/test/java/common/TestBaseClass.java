@@ -142,4 +142,14 @@ public class TestBaseClass {
 
         try {
             driver = new RemoteWebDriver(
-                    new URL("https://" + username + ":"
+                    new URL("https://" + username + ":" + access_key + "@hub.lambdatest.com/wd/hub"),
+                    browserOptions
+            );
+        } catch (MalformedURLException e) {
+            System.out.println("Invalid grid URL");
+        }
+
+        System.out.println("Started session");
+    }
+
+}
