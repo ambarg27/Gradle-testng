@@ -14,13 +14,8 @@ import library.WebDriver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.EncryptedDocumentException;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.safari.SafariDriver;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
@@ -33,8 +28,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 public class TestBaseClass {
 
@@ -54,6 +50,7 @@ public class TestBaseClass {
     public static JsonFormatter json;
     public static String reportDestination = "reports/report_" + dt + ".html";
     private static final String JSON_ARCHIVE = "target/json/jsonArchive.json";
+
     public static String username = System.getenv("LT_USERNAME");
     public static String access_key = System.getenv("LT_ACCESS_KEY");
 
@@ -78,7 +75,6 @@ public class TestBaseClass {
 
     @BeforeSuite(alwaysRun = true)
     public void setUp() throws IOException {
-
         propertiesLoad();
         extentReportSpark();
         autoOpenBrowser();
@@ -86,8 +82,9 @@ public class TestBaseClass {
 
     @AfterSuite(alwaysRun = true)
     public void tearDown() throws EncryptedDocumentException {
-
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
         extent.flush();
     }
 
@@ -95,13 +92,16 @@ public class TestBaseClass {
     public void tearDown(ITestResult result) {
 
         if (result.getStatus() == ITestResult.FAILURE) {
-            test.fail(result.getName() + " test case is failed. " + "<span class='badge badge-danger'> Fail </span>" + result.getThrowable());
+            test.fail(result.getName() + " test case is failed. "
+                    + "<span class='badge badge-danger'> Fail </span>" + result.getThrowable());
 
         } else if (result.getStatus() == ITestResult.SKIP) {
-            test.skip(result.getName() + " test case is skipped." + "<span class='badge badge-warning'> Skip </span>");
+            test.skip(result.getName() + " test case is skipped."
+                    + "<span class='badge badge-warning'> Skip </span>");
 
         } else if (result.getStatus() == ITestResult.SUCCESS) {
-            test.pass(result.getName() + " test case is Passed." + "<span class='badge badge-success'> Success </span>");
+            test.pass(result.getName() + " test case is Passed."
+                    + "<span class='badge badge-success'> Success </span>");
         }
     }
 
@@ -121,31 +121,25 @@ public class TestBaseClass {
 
     public void autoOpenBrowser() {
 
-            String platformName = System.getenv("HYPEREXECUTE_PLATFORM") != null ? System.getenv("HYPEREXECUTE_PLATFORM") : "Windows 10";
-        
-        DesiredCapabilities capabilities = new DesiredCapabilities();
+        String platformName = System.getenv("HYPEREXECUTE_PLATFORM") != null
+                ? System.getenv("HYPEREXECUTE_PLATFORM")
+                : "Windows 10";
 
-        capabilities.setCapability("build", "Smple Build");
-        capabilities.setCapability("name", "Sample test");
-        capabilities.setCapability("platform", System.getenv("HYPEREXECUTE_PLATFORM"));
-        capabilities.setCapability("browserName", "chrome");
-        capabilities.setCapability("version", "latest");
+        ChromeOptions browserOptions = new ChromeOptions();
+        browserOptions.setPlatformName(platformName);
+        browserOptions.setBrowserVersion("latest");
 
-        capabilities.setCapability("tunnel",false);
-        capabilities.setCapability("network",true);
-        capabilities.setCapability("console",true);
-        capabilities.setCapability("visual",true);
-        capabilities.setCapability("selenium_version","4.18.0");
+        Map<String, Object> ltOptions = new HashMap<>();
+        ltOptions.put("build", "Sample Build");
+        ltOptions.put("name", "Sample Test");
+        ltOptions.put("selenium_version", "4.18.0");
+        ltOptions.put("network", true);
+        ltOptions.put("console", "true");
+        ltOptions.put("visual", true);
+        ltOptions.put("tunnel", false);
 
-        try
-        {
-            driver = new RemoteWebDriver(new URL("https://" + username + ":" + access_key + "@hub.lambdatest.com/wd/hub"), capabilities);
-        }
-        catch (MalformedURLException e)
-        {
-            System.out.println("Invalid grid URL");
-        }
-        System.out.println("Started session");
-    }
+        browserOptions.setCapability("lt:options", ltOptions);
 
-}
+        try {
+            driver = new RemoteWebDriver(
+                    new URL("https://" + username + ":"
