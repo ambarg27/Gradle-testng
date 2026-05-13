@@ -10,6 +10,7 @@ import common.TestBaseClass;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.Test;
 
@@ -19,10 +20,10 @@ public class Sample2 extends TestBaseClass {
 
     String status;
 
-    @Test(groups = "Smoke")
-    public void tc00VerifyURL() throws InterruptedException {
+    @Test(groups = "Smoke", priority = 1)
+    public void tc00VerifyURL() {
 
-        test = extent.createTest("Verify URL", "Test the google link")
+        test = extent.createTest("Verify URL", "Test the TodoMVC link")
                 .assignCategory("Functional_TestCase")
                 .assignCategory("Positive_TestCase")
                 .assignAuthor("TestUser");
@@ -32,13 +33,14 @@ public class Sample2 extends TestBaseClass {
         webdriver.openURL("https://www.jivrus.com/resources/articles/technical/how-to-open-browser-console-log");
         webdriver.openURL("https://lambdatest.github.io/sample-todo-app/");
 
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("sampletodotext")));
+
         test.log(Status.INFO, "Open URL");
         logger.info("Open URL");
-
-        Thread.sleep(5000);
     }
 
-    @Test
+    @Test(priority = 2, dependsOnMethods = "tc00VerifyURL")
     public void tc01VerifyEnterText() {
         try {
             test = extent.createTest("Sample Test 2", "")
@@ -48,15 +50,15 @@ public class Sample2 extends TestBaseClass {
 
             test.log(Status.PASS, "URL is opened");
 
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-            test.log(Status.PASS, "Wait created");
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
             By textField = By.id("sampletodotext");
-            WebElement addText = driver.findElement(textField);
 
             int item_count = 5;
 
             for (int i = 1; i <= item_count; i++) {
+                /* Re-find element each iteration to avoid stale reference */
+                WebElement addText = wait.until(ExpectedConditions.elementToBeClickable(textField));
                 addText.click();
                 addText.sendKeys("Adding a new item " + i + Keys.ENTER);
                 test.log(Status.PASS, "New item No. " + i + " is added");
@@ -67,12 +69,13 @@ public class Sample2 extends TestBaseClass {
 
             for (int i = 1; i <= totalCount; i++, remaining--) {
                 String xpath = "(//input[@type='checkbox'])[" + i + "]";
-                driver.findElement(By.xpath(xpath)).click();
+                wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath))).click();
 
                 test.log(Status.PASS, "Item No. " + i + " marked completed");
 
                 By remainingItem = By.className("ng-binding");
-                String actualText = driver.findElement(remainingItem).getText();
+                String actualText = wait.until(
+                        ExpectedConditions.visibilityOfElementLocated(remainingItem)).getText();
                 String expectedText = remaining + " of " + totalCount + " remaining";
 
                 if (!expectedText.equals(actualText)) {

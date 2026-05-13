@@ -2,56 +2,58 @@ package com.test.app;
 
 import com.aventstack.extentreports.Status;
 import common.TestBaseClass;
-import org.testng.annotations.Test;
-import java.time.Duration;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.Test;
+
+import java.time.Duration;
 
 public class Sample extends TestBaseClass {
 
-    @Test(groups = "Smoke")
+    @Test(groups = "Smoke", priority = 1)
     public void tc00VerifyURL() {
 
-        test = extent.createTest("Verify URL", "Test the google link")
+        test = extent.createTest("Verify URL", "Test the TodoMVC link")
                 .assignCategory("Functional_TestCase")
                 .assignCategory("Positive_TestCase")
                 .assignAuthor("Kunal");
 
         logger.info("Verify URL");
 
-        webdriver.openURL("https://www.jivrus.com/resources/articles/technical/how-to-open-browser-console-log");
-
-        webdriver.openURL("https://www.google.com");
+        webdriver.openURL("https://todomvc.com/examples/react/dist/");
 
         test.log(Status.INFO, "Open URL");
         logger.info("Open URL");
     }
 
-    @Test
-    public void tc01VerifyEnterText() {
+    @Test(priority = 2, dependsOnMethods = "tc00VerifyURL")
+    public void tc01VerifyEnterText() throws InterruptedException {
 
-        test = extent.createTest("Verify Search Box", "")
+        test = extent.createTest("Verify Add Todo Items", "")
                 .assignCategory("Functional_TestCase")
                 .assignCategory("Positive_TestCase")
                 .assignAuthor("Kunal");
 
-        logger.info("Verify Search Box");
+        logger.info("Verify Add Todo Items");
 
-        try {
-            // Wait for Google page to load fully
-            Thread.sleep(4000);
-            webdriver.enterText(IConstants.txtName, "Automation testing");
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-            // Wait before clicking the button
-            Thread.sleep(4000);
-            webdriver.clickOnButton(IConstants.btnGoogleSearch);
+        int item_count = 15;
 
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (int count = 1; count <= item_count; count++) {
+            /* Re-find element each iteration to avoid stale reference in React */
+            WebElement elem_new_item = wait.until(
+                    ExpectedConditions.elementToBeClickable(IConstants.txtNewTodo));
+            elem_new_item.click();
+            elem_new_item.sendKeys("Adding a new item " + count + Keys.ENTER);
+            test.log(Status.PASS, "New item No. " + count + " is added");
+            Thread.sleep(3000);
         }
 
-        test.log(Status.INFO, "Verify Search Box");
-        logger.info("Verify Search Box");
+        test.log(Status.INFO, "Verify Add Todo Items");
+        logger.info("Verify Add Todo Items");
     }
 }
 
