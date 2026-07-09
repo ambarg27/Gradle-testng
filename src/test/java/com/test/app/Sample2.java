@@ -13,6 +13,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.Test;
 
+import java.time.Duration;
+
 public class Sample2 extends TestBaseClass {
 
     String status;
@@ -42,7 +44,7 @@ try {
                 .assignAuthor("Kunal");
 
         test.log(Status.PASS, "URL is opened");
-        WebDriverWait wait = new WebDriverWait(driver, 5);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
         test.log(Status.PASS, "Wait created");
 
         By textField = By.id("sampletodotext");
